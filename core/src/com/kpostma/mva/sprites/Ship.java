@@ -64,6 +64,7 @@ public class Ship {
     public void dispose()
     {
         ship.dispose();
+        System.out.println("Ship Disposed");
     }
 
 }

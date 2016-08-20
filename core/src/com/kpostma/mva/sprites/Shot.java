@@ -24,15 +24,8 @@ public class Shot {
     }
 
     public void update(float dt){
-        velocity.add(0,speed,0);
-        velocity.scl(dt);
+
         position.add(0,velocity.y, 0);
-
-        if(position.x < MVA.HEIGHT)
-            dispose();
-
-
-        velocity.scl(1/dt);
         bounds.setPosition(position.x,position.y);
     }
 

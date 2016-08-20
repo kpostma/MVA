@@ -12,7 +12,7 @@ import java.util.Random;
 /**
  * Created by Postma on 8/12/2016.
  */
-public class Astroid {
+public class smallAstroid {
     private static final int GRAVITY = -50;
     private Vector3 position;
     private Vector3 velocity;
@@ -22,10 +22,10 @@ public class Astroid {
     private int switchnumber;
     private Rectangle bounds;
 
-    public Astroid()
+    public smallAstroid(float x , float y)
     {
         rand = new Random();
-        position = new Vector3(rand.nextInt(MVA.WIDTH),rand.nextInt(20) + (MVA.HEIGHT) ,0);
+        position = new Vector3(x,y,0);
         velocity = new Vector3(0,(rand.nextInt(25)* -2) - 20,0);
         switchnumber = rand.nextInt(10);
         if(switchnumber % 2 ==0)
@@ -33,7 +33,7 @@ public class Astroid {
         else
             leftorrightswitch = false;
 
-        astroid = new Texture("astroid.png");
+        astroid = new Texture("smallAstroid.png");
 
 
         if(leftorrightswitch)
@@ -41,7 +41,7 @@ public class Astroid {
         else
             velocity.x = rand.nextInt(50);
 
-        bounds = new Rectangle(position.x + 5 , position.y + 5  , astroid.getWidth()-10, astroid.getHeight()-15);
+        bounds = new Rectangle(position.x + 5 , position.y + 5  , astroid.getWidth()-5, astroid.getHeight()-15);
     }
 
     public void update(float dt)
@@ -96,6 +96,16 @@ public class Astroid {
     {
         astroid.dispose();
         System.out.println("Astroid Disposed");
+    }
+
+    public boolean astroidRespawn()
+    {
+        if(rand.nextInt(100) < 76 )
+        {
+            return true;
+        }
+        else
+            return false;
     }
 
 }
