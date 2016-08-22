@@ -20,6 +20,14 @@ import javax.xml.soap.Text;
  * Created by Postma on 8/12/2016.
  */
 public class PlayState extends State implements  ApplicationListener, InputProcessor{
+
+    static final int GAME_READY = 0;
+    static final int GAME_RUNNING = 1;
+    static final int GAME_PAUSED = 2;
+    static final int GAME_LEVEL_END = 3;
+    static final int GAME_OVER = 4;
+    int state;
+
     //initail amount of astroids added
     private static final int Astroid_count = 1  ;
 
@@ -83,6 +91,7 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         Kdown.touched = false;
 
 
+        state = GAME_RUNNING;
         Gdx.input.setInputProcessor(this);
     }
 
@@ -94,26 +103,43 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         if(Gdx.input.justTouched())
         {
             if(Tinfo.touched){
-                if(Tinfo.touchX > MVA.HEIGHT - 50 && Tinfo.touchY > MVA.HEIGHT - 50)
+                System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
+                if(Tinfo.touchX > MVA.WIDTH - 50 && Tinfo.touchY < 50)
                 {
-
-                }
-
-
-                if(Tinfo.touchX > (MVA.WIDTH/2) && Tinfo.touchX < MVA.WIDTH) {
-                    if (movementSwitch) {
-                        ship.moveLeft();
-                        movementSwitch = false;
-                    } else {
-                        ship.moveRight();
-                        movementSwitch = true;
+                    if(state == GAME_RUNNING)
+                    {
+                        state = GAME_PAUSED;
+                        System.out.println("game paused");
+                    }
+                    else
+                    {
+                        state= GAME_RUNNING;
                     }
                 }
-                else if(Tinfo.touchX < (MVA.WIDTH/2))
+
+                if(state==GAME_RUNNING)
                 {
-                    shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
-                    shotswitch = true;
+                    if(Tinfo.touchX > (MVA.WIDTH/2) && Tinfo.touchX < MVA.WIDTH) {
+                        if (movementSwitch) {
+                            ship.moveLeft();
+                            movementSwitch = false;
+                        } else {
+                            ship.moveRight();
+                            movementSwitch = true;
+                        }
+                    }
+                    else if(Tinfo.touchX < (MVA.WIDTH/2))
+                    {
+                        shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                        shotswitch = true;
+                    }
                 }
+                else if(state == GAME_PAUSED)
+                {
+
+                }
+
+
             }
         }
         if(Kdown.touched)
@@ -128,12 +154,32 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     public void update(float dt) {
         handleInput();
 
+        switch(state)
+        {
+            case GAME_RUNNING:
+                updateRunning(dt);
+                break;
+            case GAME_PAUSED:
+                updatePaused();
+                break;
 
+        }
+
+
+    }
+
+    private void updatePaused() {
+
+    }
+
+
+    private void updateRunning(float dt)
+    {
         ship.update(dt);
 
         if(astroids.size < 1 && smallastroids.size < 1){ astroids.add(new Astroid()); }
 
-       for (Astroid astroid : astroids)
+        for (Astroid astroid : astroids)
         {
             astroid.update(dt);
 
@@ -228,29 +274,66 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         }
     }
 
+
+
+
     @Override
     public void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(cam.combined);
-        sb.begin();
-        sb.draw(bg, 0,0 , MVA.WIDTH, MVA.HEIGHT);
-        sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, setting.getWidth(), setting.getHeight());
-        sb.draw(ship.getTexture(),ship.getPosition().x,ship.getPosition().y);
+
+        switch(state)
+        {
+            case GAME_RUNNING:
+                sb.setProjectionMatrix(cam.combined);
+                sb.begin();
+                sb.draw(bg, 0,0 , MVA.WIDTH, MVA.HEIGHT);
+                sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, setting.getWidth(), setting.getHeight());
+                sb.draw(ship.getTexture(),ship.getPosition().x,ship.getPosition().y);
 
 
-        for(Astroid astroid : astroids)
-            sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
+                for(Astroid astroid : astroids)
+                    sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
 
 
-        for(smallAstroid astroid : smallastroids)
-            sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
+                for(smallAstroid astroid : smallastroids)
+                    sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
 
-        for(Shot shot: shots)
-        sb.draw(shot.getTexture(),shot.getPosition().x,shot.getPosition().y);
+                for(Shot shot: shots)
+                    sb.draw(shot.getTexture(),shot.getPosition().x,shot.getPosition().y);
 
 
-        scoreFont.draw(sb,String.valueOf(score), 10 , MVA.HEIGHT - 25 );
+                scoreFont.draw(sb,String.valueOf(score), 10 , MVA.HEIGHT - 25 );
 
-        sb.end();
+                sb.end();
+
+                break;
+
+            case GAME_PAUSED:
+                sb.setProjectionMatrix(cam.combined);
+                sb.begin();
+                sb.draw(bg, 0, 0, MVA.WIDTH, MVA.HEIGHT);
+                sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, setting.getWidth(), setting.getHeight());
+                sb.draw(ship.getTexture(),ship.getPosition().x,ship.getPosition().y);
+
+
+                for(Astroid astroid : astroids)
+                    sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
+
+
+                for(smallAstroid astroid : smallastroids)
+                    sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
+
+                for(Shot shot: shots)
+                    sb.draw(shot.getTexture(),shot.getPosition().x,shot.getPosition().y);
+
+
+                scoreFont.draw(sb,String.valueOf(score), 10 , MVA.HEIGHT - 25 );
+
+                sb.end();
+                break;
+
+        }
+
+
 
     }
 

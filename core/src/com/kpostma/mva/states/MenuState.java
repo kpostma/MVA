@@ -12,13 +12,14 @@ import com.kpostma.mva.MVA;
 public class MenuState extends State {
     private Texture bg;
     private Texture playBtn;
+    private int test;
 
 
     public MenuState(GameStateManager gsm) {
         super(gsm);
         bg = new Texture("MainBG.jpg");
         playBtn = new Texture("playbtn.png");
-
+        test = 5;
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
     }
 
@@ -37,6 +38,7 @@ public class MenuState extends State {
 
     @Override
     public void render(SpriteBatch sb) {
+        sb.setProjectionMatrix(cam.combined);
         sb.begin();
         sb.draw(bg, 0,0, MVA.WIDTH, MVA.HEIGHT);
         sb.draw(playBtn , (MVA.WIDTH/2) - (playBtn.getWidth()/2) , (MVA.HEIGHT/2) - (playBtn.getHeight()/4));
