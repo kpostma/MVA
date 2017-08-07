@@ -12,12 +12,16 @@ import com.kpostma.mva.MVA;
 public class MenuState extends State  implements  InputProcessor {
     private Texture bg;
     private Texture playBtn;
+    private Texture hsBtn;
+    private Texture settingsBtn;
+
+
     private int test;
     private int hs;
 
     private TouchInfo Tinfo;
 
-    class TouchInfo {
+    private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
         public boolean touched = false;
@@ -25,8 +29,10 @@ public class MenuState extends State  implements  InputProcessor {
 
     public MenuState(GameStateManager gsm) {
         super(gsm);
-        bg = new Texture("MainBG.jpg");
+        bg = new Texture("spacebg.jpg");
         playBtn = new Texture("playbtn.png");
+        hsBtn = new Texture("highscorebtn.png");
+        settingsBtn = new Texture("settingbtn.png");
         test = 5;
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
 
@@ -49,9 +55,19 @@ public class MenuState extends State  implements  InputProcessor {
     public void handleInput() {
         if(Tinfo.touched)
         {
-            if(Tinfo.touchX >(MVA.WIDTH/2) - (playBtn.getWidth()/2) && Tinfo.touchX < (MVA.WIDTH/2) + (playBtn.getWidth()/2) && Tinfo.touchY > (MVA.HEIGHT/2) - (playBtn.getHeight()/4) && Tinfo.touchY < (MVA.HEIGHT/2) + (playBtn.getHeight()/4))
+            System.out.println("touched" + Tinfo.touchY);
+            if(Tinfo.touchY > 100  && Tinfo.touchY < 200)
             {
+
+                System.out.println("touched play");
                 gsm.set(new PlayState(gsm));
+                gsm.setHighScore(hs);
+                gsm.setPState(false);
+            }
+            else if(Tinfo.touchY < 350 && Tinfo.touchY > 250)
+            {
+                System.out.println("Touched Settings");
+                gsm.set(new SettingsState(gsm));
                 gsm.setHighScore(hs);
                 gsm.setPState(false);
             }
@@ -73,7 +89,9 @@ public class MenuState extends State  implements  InputProcessor {
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
         sb.draw(bg, 0,0, MVA.WIDTH, MVA.HEIGHT);
-        sb.draw(playBtn , (MVA.WIDTH/2) - (playBtn.getWidth()/2) , (MVA.HEIGHT/2) - (playBtn.getHeight()/4));
+        sb.draw(playBtn ,50, MVA.HEIGHT - 200 , MVA.WIDTH - 100, 100);
+        sb.draw(settingsBtn ,50, MVA.HEIGHT - 350 , MVA.WIDTH - 100, 100);
+        sb.draw(hsBtn ,50, MVA.HEIGHT - 500 , MVA.WIDTH - 100, 100);
         sb.end();
     }
 
@@ -81,6 +99,8 @@ public class MenuState extends State  implements  InputProcessor {
     public void dispose() {
         bg.dispose();
         playBtn.dispose();
+        hsBtn.dispose();
+        settingsBtn.dispose();
         System.out.println("Menu State Dispoed");
     }
 
@@ -94,8 +114,8 @@ public class MenuState extends State  implements  InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Tinfo.touchX = 0;
-        Tinfo.touchY = 0;
+        Tinfo.touchX = -1;
+        Tinfo.touchY = -1;
         Tinfo.touched = false;
         return true;
     }

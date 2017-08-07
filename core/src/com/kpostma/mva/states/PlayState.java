@@ -12,6 +12,7 @@ import com.kpostma.mva.sprites.Ship;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.InputProcessor;
 import com.kpostma.mva.sprites.Shot;
+import com.kpostma.mva.sprites.powerup;
 import com.kpostma.mva.sprites.smallAstroid;
 
 import javax.xml.soap.Text;
@@ -27,9 +28,6 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     static final int GAME_PAUSED = 1;
     int state;
 
-    //initail amount of astroids added
-    private static final int Astroid_count = 1  ;
-
 
     private Ship ship;
     private Texture bg;
@@ -39,6 +37,7 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     private Array<Astroid> astroids;
     private Array<smallAstroid> smallastroids;
     private Array<Shot> shots;
+    private Array<powerup> powerups;
     private boolean shotswitch;
     BitmapFont scoreFont;
     private int score;
@@ -46,13 +45,13 @@ public class PlayState extends State implements  ApplicationListener, InputProce
 
 
     //class to hold the info from any screen touch
-    class TouchInfo {
+    private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
         public boolean touched = false;
     }
     //class to say what key is touched/pressed
-    class KeyDown {
+    private class KeyDown {
         public int keycode;
         public boolean touched = false;
     }
@@ -64,22 +63,18 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         super(gsm);
         movementSwitch = true;
         ship = new Ship(MVA.WIDTH/2,50);
-        bg = new Texture("whitebg.jpg");
-        setting = new Texture("settingicon.png");
+        bg = new Texture("spacebg.jpg");
+        setting = new Texture("settinggear.png");
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
         shotswitch = true;
         scoreFont = new BitmapFont();
         score = 0;
         hs = gsm.getHighScore();
-
-        astroids = new Array<Astroid>(Astroid_count);
-        for(int i =  0; i < Astroid_count ; i++)
-        {
-            astroids.add(new Astroid());
-        }
+        astroids = new Array<Astroid>();
 
         shots = new Array<Shot>();
         smallastroids = new Array<smallAstroid>();
+        powerups = new Array<powerup>();
 
 
         Tinfo = new TouchInfo();
@@ -162,6 +157,19 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     private void updateRunning(float dt)
     {
         ship.update(dt);
+        if(powerups.size !=0)
+        {
+            for(int indexPU=0; indexPU< powerups.size ; ++indexPU)
+            {
+                powerups.get(indexPU).update(dt);
+                if( powerups.get(indexPU).collides(ship.getBounds()))
+                {
+                    //activate powerup
+                    powerups.get(indexPU).dispose();
+                    powerups.removeIndex(indexPU);
+                }
+            }
+        }
 
         if(astroids.size < 1 && smallastroids.size < 1){ astroids.add(new Astroid()); }
 
@@ -175,8 +183,10 @@ public class PlayState extends State implements  ApplicationListener, InputProce
             if(astroid.getPosition().x < 0 + 5 || astroid.getPosition().x > (MVA.WIDTH - astroid.getTexture().getWidth() - 5))
                 astroid.bounce();
 
-            if(astroid.collides(ship.getBounds()))
+            if(astroid.collides(ship.getBounds())) {
+                gsm.setHighScore(hs);
                 gsm.set(new MenuState(gsm));
+            }
         }
 
 
@@ -191,6 +201,7 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                 smallastroid.bounce();
 
             if(smallastroid.collides(ship.getBounds())){
+                gsm.setHighScore(hs);
                 gsm.set(new MenuState(gsm));
             }
         }
@@ -212,8 +223,10 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                         astroids.add(new Astroid());
                         System.out.println("Astroid Added");
                     }
-                    else
-                        System.out.println("Astroid Not Added");
+                    else {
+                        powerups.add(new powerup(smallastroids.get(i).getPosition().x,smallastroids.get(i).getPosition().y));
+                        System.out.println("Powerup Added");
+                    }
 
 
                     smallastroids.get(i).dispose();
@@ -235,11 +248,8 @@ public class PlayState extends State implements  ApplicationListener, InputProce
             }
 
             if(shotswitch) {
-                System.out.println("shotswitch fine");
                 for (int index = 0; index < astroids.size; index++) {
-                    System.out.println("inside astroids forloop");
                     if (shots.get(idx).collides(astroids.get(index).getBounds())) {
-                        System.out.println("inside collides");
 
                         smallastroids.add(new smallAstroid((int) astroids.get(index).getPosition().x, (int) astroids.get(index).getPosition().y));
                         smallastroids.add(new smallAstroid((int) astroids.get(index).getPosition().x, (int) astroids.get(index).getPosition().y));
@@ -272,19 +282,20 @@ public class PlayState extends State implements  ApplicationListener, InputProce
             sb.setProjectionMatrix(cam.combined);
             sb.begin();
             sb.draw(bg, 0,0 , MVA.WIDTH, MVA.HEIGHT);
-            sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, setting.getWidth(), setting.getHeight());
+            sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, 50, 50);
             sb.draw(ship.getTexture(),ship.getPosition().x,ship.getPosition().y);
+            for(powerup pu : powerups)
+                sb.draw(pu.getTexture(),pu.getPosition().x,pu.getPosition().y);
 
             for(Astroid astroid : astroids)
                 sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
-
 
             for(smallAstroid astroid : smallastroids)
                 sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
 
             for(Shot shot: shots)
                 sb.draw(shot.getTexture(),shot.getPosition().x,shot.getPosition().y);
-
+            scoreFont.getData().setScale(1.5f);
             scoreFont.draw(sb,String.valueOf(score), 10 , MVA.HEIGHT - 25 );
             sb.end();
         }
@@ -293,7 +304,9 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     @Override
     public void dispose() {
         bg.dispose();
+        setting.dispose();
         ship.dispose();
+        scoreFont.dispose();
         System.out.println("Play State Disposed");
     }
 

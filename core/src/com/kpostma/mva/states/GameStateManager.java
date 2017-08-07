@@ -13,6 +13,11 @@ public class GameStateManager {
     private boolean PriorityState;
     private int HighScore;
 
+    private int mainValue;
+    private int SFXValue;
+    private int musicValue;
+
+
     public GameStateManager(){
         states = new Stack<State>();
     }
@@ -44,6 +49,12 @@ public class GameStateManager {
     }
     public boolean getPstate(){return PriorityState;}
     public void setPState(boolean pState){ PriorityState = pState;}
-    public int getHighScore(){return HighScore;}
+    public String getHighScoreString(){
+        String hs = "HighScore: " + String.valueOf(HighScore);
+        return hs;
+    }
     public void setHighScore(int hs){HighScore = hs;}
+    public int getHighScore(){ return HighScore;}
+
+
 }

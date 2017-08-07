@@ -1,6 +1,5 @@
 package com.kpostma.mva.states;
 
-import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Texture;
@@ -8,13 +7,12 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.kpostma.mva.MVA;
 
+import javax.xml.soap.Text;
+
 /**
- * Created by Postma on 8/22/2016.
+ * Created by Postma on 9/1/2016.
  */
-public class PauseState extends State  implements  InputProcessor
-{
-
-
+public class SettingsState extends State implements InputProcessor {
     private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
@@ -22,22 +20,31 @@ public class PauseState extends State  implements  InputProcessor
     }
 
     private Texture bg;
-    private Texture resumebtn;
-    private Texture quitbtn;
-    private TouchInfo Tinfo;
-    BitmapFont scoreFont;
+    private Texture up;
+    private Texture down;
+    private Texture back;
 
-    protected PauseState(GameStateManager gsm)
-    {
+    private int MainVol;
+    private int SFXVol;
+    private int MusicVol;
+    private TouchInfo  Tinfo;
+    BitmapFont Headings;
+
+    private int mainValue;
+    private int SFXValue;
+    private int musicValue;
+
+    public SettingsState(GameStateManager gsm){
         super(gsm);
+
         bg = new Texture("spacebg.jpg");
-        resumebtn = new Texture("resumebtn.png");
-        quitbtn = new Texture("quitbtn.png");
+        back = new Texture("backArrow.png");
+        up = new Texture("upArrow.png");
+        down = new Texture("downArrow.png");
+        Headings = new BitmapFont();
 
-        scoreFont = new BitmapFont();
+        cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
 
-
-        cam.setToOrtho(false, MVA.WIDTH, MVA.HEIGHT);
         Tinfo = new TouchInfo();
         Tinfo.touched = false;
         Tinfo.touchX = -1;
@@ -48,7 +55,7 @@ public class PauseState extends State  implements  InputProcessor
     }
 
     @Override
-    protected void handleInput( ) {
+    protected void handleInput() {
         if(Tinfo.touched){
             System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
             if(Tinfo.touchY < 200 && Tinfo.touchY > 100)
@@ -72,26 +79,39 @@ public class PauseState extends State  implements  InputProcessor
 
     @Override
     public void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(cam.combined);
         sb.begin();
         sb.draw(bg, 0, 0, MVA.WIDTH, MVA.HEIGHT);
-        sb.draw(resumebtn,50, MVA.HEIGHT - 200 , MVA.WIDTH-100, 100);
-        sb.draw(quitbtn,50, MVA.HEIGHT - 350 , MVA.WIDTH - 100, 100);
-        scoreFont.getData().setScale(2);
-        scoreFont.draw(sb,gsm.getHighScoreString(),MVA.WIDTH/8 , MVA.HEIGHT - 50 );
+        sb.draw(back,50, MVA.HEIGHT - 100 , 100 , 50);
+
+        sb.draw(up ,MVA.WIDTH/2 , MVA.HEIGHT - 200 , 50, 50);
+        sb.draw(down ,MVA.WIDTH/2 + 75 , MVA.HEIGHT - 200 , 50, 50);
+
+
+        sb.draw(up ,MVA.WIDTH/2 , MVA.HEIGHT - 310 , 50, 50);
+        sb.draw(down ,MVA.WIDTH/2 + 75 , MVA.HEIGHT - 310 , 50, 50);
+
+
+        sb.draw(up ,MVA.WIDTH/2 , MVA.HEIGHT - 410 , 50, 50);
+        sb.draw(down ,MVA.WIDTH/2 + 75 , MVA.HEIGHT - 410 , 50, 50);
+
+
+        Headings.getData().setScale(2);
+        Headings.draw(sb,"Master Volume \n\n\nEffects Volume \n\n\nMusic Volume",MVA.WIDTH/2 - 200 , MVA.HEIGHT - 160 );
 
         sb.end();
-
     }
 
     @Override
     public void dispose() {
         bg.dispose();
-        resumebtn.dispose();
-        quitbtn.dispose();
-        scoreFont.dispose();
-        System.out.println("Pause State Disposed");
+        back.dispose();
+        up.dispose();
+        down.dispose();
+        back.dispose();
+        Headings.dispose();
+
     }
+
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         Tinfo.touchX = screenX;
@@ -102,13 +122,11 @@ public class PauseState extends State  implements  InputProcessor
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Tinfo.touchX = 0;
-        Tinfo.touchY = 0;
+        Tinfo.touchX = -1;
+        Tinfo.touchY = -1;
         Tinfo.touched = false;
         return true;
     }
-
-
 
     @Override
     public boolean keyDown(int keycode) {
@@ -141,5 +159,6 @@ public class PauseState extends State  implements  InputProcessor
     public boolean scrolled(int amount) {
         return false;
     }
+
 
 }

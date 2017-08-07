@@ -20,7 +20,7 @@ public class Ship {
 
     public Ship(int x, int y)
     {
-        ship = new Texture("ship3.png");
+        ship = new Texture("ship1.png");
         position = new Vector3(x - (ship.getWidth()/2),y,0);
         velocity = new Vector3(0,0,0);
         bounds = new Rectangle(x,y,ship.getWidth()-15,ship.getHeight()-15);
