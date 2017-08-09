@@ -2,6 +2,7 @@ package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.kpostma.mva.MVA;
@@ -12,12 +13,19 @@ import com.kpostma.mva.MVA;
 public class MenuState extends State  implements  InputProcessor {
     private Texture bg;
     private Texture playBtn;
+    private Texture hsBtn;
+    private Texture settingsBtn;
+
+    private GameData gd;
+
     private int test;
     private int hs;
 
+    private Sound ButtonClick;
+
     private TouchInfo Tinfo;
 
-    class TouchInfo {
+    private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
         public boolean touched = false;
@@ -25,16 +33,16 @@ public class MenuState extends State  implements  InputProcessor {
 
     public MenuState(GameStateManager gsm) {
         super(gsm);
-        bg = new Texture("MainBG.jpg");
+        bg = new Texture("spacebg.jpg");
         playBtn = new Texture("playbtn.png");
+        hsBtn = new Texture("highscorebtn.png");
+        settingsBtn = new Texture("settingbtn.png");
         test = 5;
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
 
-        if(gsm.getHighScore() < 10000)
-        hs=10000;
-        else
-        hs=gsm.getHighScore();
+        ButtonClick = Gdx.audio.newSound(Gdx.files.internal("Menu Click.mp3"));
 
+        hs=gsm.getHighScore();
 
         Tinfo = new TouchInfo();
         Tinfo.touched = false;
@@ -49,14 +57,43 @@ public class MenuState extends State  implements  InputProcessor {
     public void handleInput() {
         if(Tinfo.touched)
         {
-            if(Tinfo.touchX >(MVA.WIDTH/2) - (playBtn.getWidth()/2) && Tinfo.touchX < (MVA.WIDTH/2) + (playBtn.getWidth()/2) && Tinfo.touchY > (MVA.HEIGHT/2) - (playBtn.getHeight()/4) && Tinfo.touchY < (MVA.HEIGHT/2) + (playBtn.getHeight()/4))
+            System.out.println("touched" + Tinfo.touchY);
+            if(Tinfo.touchY < ((MVA.HEIGHT / 4) +200) && Tinfo.touchY > ((MVA.HEIGHT / 4)))
             {
+                ButtonClick.play(gsm.getEffectVolume());
+                System.out.println("touched play");
                 gsm.set(new PlayState(gsm));
-                gsm.setHighScore(hs);
+                //gsm.setHighScore(hs);
                 gsm.setPState(false);
             }
+            else if(Tinfo.touchY < ((MVA.HEIGHT / 4) )*4 +200 && Tinfo.touchY > ((MVA.HEIGHT / 4)*4))
+            {
+                ButtonClick.play(gsm.getEffectVolume());
+                System.out.println("Touched Settings");
+                gsm.set(new SettingsState(gsm));
+               // gsm.setHighScore(hs);
+                gsm.setPState(false);
+            }
+            else if(Tinfo.touchY < ((MVA.HEIGHT / 4) )*6 +200&& Tinfo.touchY > ((MVA.HEIGHT / 4)*6))   {
+                ButtonClick.play(gsm.getEffectVolume());
+                System.out.println("Touched HighScore");
+                gsm.set(new HighScoreState(gsm));
+                //gsm.setHighScore(hs);
+                gsm.setPState(false);
+            }
+
         }
 
+    }
+    @Override
+    public void render(SpriteBatch sb) {
+        sb.setProjectionMatrix(cam.combined);
+        sb.begin();
+        sb.draw(bg, 0,0);
+        sb.draw(playBtn ,50, (MVA.HEIGHT / 4)*3 , MVA.WIDTH - 100, 100);
+        sb.draw(settingsBtn ,50, (MVA.HEIGHT / 4)*2 , MVA.WIDTH - 100, 100);
+        sb.draw(hsBtn ,50, (MVA.HEIGHT / 4) , MVA.WIDTH - 100, 100);
+        sb.end();
     }
 
     @Override
@@ -69,18 +106,12 @@ public class MenuState extends State  implements  InputProcessor {
     }
 
     @Override
-    public void render(SpriteBatch sb) {
-        sb.setProjectionMatrix(cam.combined);
-        sb.begin();
-        sb.draw(bg, 0,0, MVA.WIDTH, MVA.HEIGHT);
-        sb.draw(playBtn , (MVA.WIDTH/2) - (playBtn.getWidth()/2) , (MVA.HEIGHT/2) - (playBtn.getHeight()/4));
-        sb.end();
-    }
-
-    @Override
     public void dispose() {
         bg.dispose();
         playBtn.dispose();
+        hsBtn.dispose();
+        ButtonClick.dispose();
+        settingsBtn.dispose();
         System.out.println("Menu State Dispoed");
     }
 
@@ -94,8 +125,8 @@ public class MenuState extends State  implements  InputProcessor {
 
     @Override
     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-        Tinfo.touchX = 0;
-        Tinfo.touchY = 0;
+        Tinfo.touchX = -1;
+        Tinfo.touchY = -1;
         Tinfo.touched = false;
         return true;
     }

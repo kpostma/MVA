@@ -98,9 +98,10 @@ public class smallAstroid {
         System.out.println("Astroid Disposed");
     }
 
+    //determins if it spawns or a powerup spawns
     public boolean astroidRespawn()
     {
-        if(rand.nextInt(100) < 76 )
+        if(rand.nextInt(100) < 95 )
         {
             return true;
         }

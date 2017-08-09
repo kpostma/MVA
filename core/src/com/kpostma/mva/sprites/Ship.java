@@ -1,5 +1,7 @@
 package com.kpostma.mva.sprites;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
@@ -17,13 +19,18 @@ public class Ship {
     private static final int GRAVITY = -15;
     private Rectangle bounds;
     private Texture ship;
+    private Sound shot;
+    private float SoundEffectVol;
 
     public Ship(int x, int y)
     {
-        ship = new Texture("ship3.png");
+        ship = new Texture("ship1.png");
         position = new Vector3(x - (ship.getWidth()/2),y,0);
         velocity = new Vector3(0,0,0);
         bounds = new Rectangle(x,y,ship.getWidth()-15,ship.getHeight()-15);
+        shot = Gdx.audio.newSound(Gdx.files.internal("Ship Laser.mp3"));
+        SoundEffectVol = 0.5f;
+
     }
 
     public void update(float dt){
@@ -49,22 +56,31 @@ public class Ship {
         return ship;
     }
 
-    public void moveLeft(){
+    public void moveLeft()
+    {
         velocity.x = -200;
+        shot.play(SoundEffectVol);
     }
-    public void moveRight(){
-
+    public void moveRight()
+    {
         velocity.x = 200;
+        shot.play(SoundEffectVol);
     }
     public Rectangle getBounds()
     {
         return bounds;
     }
 
+    public void setSoundVol(float vol)
+    {
+       SoundEffectVol = vol;
+    }
+
     public void dispose()
     {
         ship.dispose();
         System.out.println("Ship Disposed");
+        shot.dispose();
     }
 
 }

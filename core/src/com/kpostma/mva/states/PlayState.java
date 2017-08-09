@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,6 +13,7 @@ import com.kpostma.mva.sprites.Ship;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.InputProcessor;
 import com.kpostma.mva.sprites.Shot;
+import com.kpostma.mva.sprites.powerup;
 import com.kpostma.mva.sprites.smallAstroid;
 
 import javax.xml.soap.Text;
@@ -27,9 +29,6 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     static final int GAME_PAUSED = 1;
     int state;
 
-    //initail amount of astroids added
-    private static final int Astroid_count = 1  ;
-
 
     private Ship ship;
     private Texture bg;
@@ -39,20 +38,34 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     private Array<Astroid> astroids;
     private Array<smallAstroid> smallastroids;
     private Array<Shot> shots;
+    private Array<powerup> powerups;
     private boolean shotswitch;
     BitmapFont scoreFont;
     private int score;
     private int hs;
 
+    //power ups
+    private boolean rapidfire;
+    private boolean pointmulti;
+    private boolean penshot;
+
+    //sounds
+    private Sound Afterdeath;
+    private Sound NukeSound;
+    private Sound PowerupSound;
+    private Sound ShipExplosion;
+    private Sound ClickButton;
+
+
 
     //class to hold the info from any screen touch
-    class TouchInfo {
+    private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
         public boolean touched = false;
     }
     //class to say what key is touched/pressed
-    class KeyDown {
+    private class KeyDown {
         public int keycode;
         public boolean touched = false;
     }
@@ -64,23 +77,28 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         super(gsm);
         movementSwitch = true;
         ship = new Ship(MVA.WIDTH/2,50);
-        bg = new Texture("whitebg.jpg");
-        setting = new Texture("settingicon.png");
+        bg = new Texture("spacebg.jpg");
+        setting = new Texture("settinggear.png");
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
         shotswitch = true;
         scoreFont = new BitmapFont();
         score = 0;
         hs = gsm.getHighScore();
+        astroids = new Array<Astroid>();
 
-        astroids = new Array<Astroid>(Astroid_count);
-        for(int i =  0; i < Astroid_count ; i++)
-        {
-            astroids.add(new Astroid());
-        }
+        Afterdeath = Gdx.audio.newSound(Gdx.files.internal("After Death.mp3"));
+        NukeSound  = Gdx.audio.newSound(Gdx.files.internal("Nuke.mp3"));
+        PowerupSound  = Gdx.audio.newSound(Gdx.files.internal("Power Up.mp3"));
+        ShipExplosion = Gdx.audio.newSound(Gdx.files.internal("Ship Explosion.mp3"));
+        ClickButton = Gdx.audio.newSound(Gdx.files.internal("Menu Click.mp3"));
 
         shots = new Array<Shot>();
         smallastroids = new Array<smallAstroid>();
+        powerups = new Array<powerup>();
 
+        rapidfire = false;
+        penshot = false;
+        pointmulti = false;
 
         Tinfo = new TouchInfo();
         Tinfo.touchX = -1;
@@ -105,13 +123,14 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         {
             if(Tinfo.touched){
                 System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
-                if(Tinfo.touchX > MVA.WIDTH - 50 && Tinfo.touchY < 50)
+                if(Tinfo.touchX > MVA.WIDTH - 200 && Tinfo.touchY < 200)
                 {
                     if(score > hs)
                     {
                         hs = score;
                         gsm.setHighScore(hs);
                     }
+                    ClickButton.play(gsm.getEffectVolume());
                     gsm.push(new PauseState(gsm),true);
                     state = GAME_PAUSED;
                     System.out.println("game paused");
@@ -121,25 +140,29 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                 if(state==GAME_RUNNING)
                 {
                     Gdx.input.setInputProcessor(this);
-                    if(Tinfo.touchX > (MVA.WIDTH/2) && Tinfo.touchX < MVA.WIDTH) {
-                        if (movementSwitch) {
-                            ship.moveLeft();
-                            movementSwitch = false;
-                        } else {
-                            ship.moveRight();
-                            movementSwitch = true;
-                        }
-                    }
-                    else if(Tinfo.touchX < (MVA.WIDTH/2))
-                    {
-                        shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
-                        shotswitch = true;
-                    }
+                if (movementSwitch) {
+                    ship.moveLeft();
+                    movementSwitch = false;
+                } else {
+                    ship.moveRight();
+                    movementSwitch = true;
+                }
+
+                shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                shotswitch = true;
+
                 }
             }
         }
         if(Kdown.touched)
         {
+            System.out.print("shot fired");
+            if(rapidfire)
+            {
+                shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) -5 , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) +5 , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+            }
+            else
             shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
             Kdown.touched=false;
             shotswitch = true;
@@ -162,42 +185,130 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     private void updateRunning(float dt)
     {
         ship.update(dt);
+        if(powerups.size !=0)
+        {
+            for(int indexPU=0; indexPU< powerups.size ; ++indexPU)
+            {
+                powerups.get(indexPU).update(dt);
+                if( powerups.get(indexPU).collides(ship.getBounds()))
+                {
 
+                    PowerupSound.play(gsm.getEffectVolume());
+                    //activate powerup
+                    switch (powerups.get(indexPU).getPoweruptype())
+                    {
+                        case 1:
+                            //rapid fire
+                            System.out.println("rapid fire");
+                            rapidfire = true;
+                            penshot = false;
+                            pointmulti = false;
+                            break;
+                        case 2:
+                            //pen shot
+                            System.out.println("pen shot");
+                            rapidfire = false;
+                            penshot = true;
+                            pointmulti = false;
+                            break;
+                        case 3:
+                            //nuke
+                            System.out.println("nuke");
+                            rapidfire = false;
+                            penshot = false;
+                            pointmulti = false;
+
+                            NukeSound.play(gsm.getEffectVolume());
+
+                            if(astroids.size!=0) {
+                                for(int index=0;index!=astroids.size;) {
+                                    astroids.get(index).dispose();
+                                    astroids.removeIndex(index);
+                                }
+                            }
+                            if(smallastroids.size!=0) {
+                                for (int i = 0; i != smallastroids.size;) {
+                                    smallastroids.get(i).dispose();
+                                    smallastroids.removeIndex(i);
+                                }
+                            }
+                            break;
+                        case 4:
+                            //point bonus
+                            System.out.println("+1500 points");
+                            score += 1500;
+                            break;
+                        case 5:
+                            //point multiplier
+                            System.out.println("point multiplier");
+                            rapidfire = false;
+                            penshot = false;
+                            pointmulti = true;
+                            break;
+
+                    }
+                    powerups.get(indexPU).dispose();
+                    powerups.removeIndex(indexPU);
+
+                }
+                else if(powerups.get(indexPU).getPosition().y <= 0)
+                {
+                    powerups.get(indexPU).dispose();
+                    powerups.removeIndex(indexPU);
+
+                }
+
+                if(powerups.size <=0)
+                {
+                    break;
+                }
+            }
+        }
+
+        //when no astroids add 1
         if(astroids.size < 1 && smallastroids.size < 1){ astroids.add(new Astroid()); }
 
+        //when there are astroids
         for (Astroid astroid : astroids)
         {
             astroid.update(dt);
-
+            //reset if astroid hits bottom
             if (astroid.getPosition().y < 0)
                 astroid.reset();
-
+            //bounce if hits a side
             if(astroid.getPosition().x < 0 + 5 || astroid.getPosition().x > (MVA.WIDTH - astroid.getTexture().getWidth() - 5))
                 astroid.bounce();
-
-            if(astroid.collides(ship.getBounds()))
+            //ship hit end game
+            if(astroid.collides(ship.getBounds())) {
+                gsm.setHighScore(hs);
+                ShipExplosion.play(gsm.getEffectVolume());
+                Afterdeath.play(gsm.getEffectVolume());
                 gsm.set(new MenuState(gsm));
+            }
         }
 
 
         for (smallAstroid smallastroid : smallastroids)
         {
             smallastroid.update(dt);
-
+            //if hits bottom reset
             if (smallastroid.getPosition().y < 0)
                 smallastroid.reset();
-
+            //if hits wall bounce
             if(smallastroid.getPosition().x < 0 + 5 || smallastroid.getPosition().x > (MVA.WIDTH - smallastroid.getTexture().getWidth() - 5))
                 smallastroid.bounce();
-
+            //if hits ship end game
             if(smallastroid.collides(ship.getBounds())){
+                gsm.setHighScore(hs);
+                ShipExplosion.play(gsm.getEffectVolume());
+                Afterdeath.play(gsm.getEffectVolume());
                 gsm.set(new MenuState(gsm));
             }
         }
 
         for(int idx = 0 ; idx < shots.size ; ++idx) {
             shots.get(idx).update(dt);
-
+            //dispose of shots that go off screen
             if (shots.get(idx).getPosition().y > MVA.HEIGHT){
                 shots.get(idx).dispose();
                 shots.removeIndex(idx);
@@ -207,54 +318,59 @@ public class PlayState extends State implements  ApplicationListener, InputProce
             for (int i = 0; i < smallastroids.size; i++) {
                 if (shots.get(idx).collides(smallastroids.get(i).getBounds())) {
 
+                    //if a new astroid spawns or a powerup
                     if(smallastroids.get(i).astroidRespawn())
                     {
                         astroids.add(new Astroid());
                         System.out.println("Astroid Added");
                     }
-                    else
-                        System.out.println("Astroid Not Added");
+                    else {
+                        powerups.add(new powerup(smallastroids.get(i).getPosition().x,smallastroids.get(i).getPosition().y));
+                        System.out.println("Powerup Added");
+                    }
 
 
                     smallastroids.get(i).dispose();
                     smallastroids.removeIndex(i);
                     System.out.println("smallAstroid Removed");
-
-                    shots.get(idx).dispose();
-                    shots.removeIndex(idx);
-                    System.out.println("Shot Removed");
+                    if(!penshot)
+                    {
+                        shots.get(idx).dispose();
+                        shots.removeIndex(idx);
+                        System.out.println("Shot Removed");
+                    }
                     if(shots.size == 0 || idx == shots.size)
                     {
                         shotswitch = false;
                     }
 
+                    if(pointmulti)
+                    score += 500;
+                    else
                     score += 250;
-                    System.out.println("250 points added");
+
                     break;
                 }
             }
 
             if(shotswitch) {
-                System.out.println("shotswitch fine");
                 for (int index = 0; index < astroids.size; index++) {
-                    System.out.println("inside astroids forloop");
                     if (shots.get(idx).collides(astroids.get(index).getBounds())) {
-                        System.out.println("inside collides");
 
                         smallastroids.add(new smallAstroid((int) astroids.get(index).getPosition().x, (int) astroids.get(index).getPosition().y));
                         smallastroids.add(new smallAstroid((int) astroids.get(index).getPosition().x, (int) astroids.get(index).getPosition().y));
-                        System.out.println("Two smallAstroids added");
 
                         astroids.get(index).dispose();
                         astroids.removeIndex(index);
-                        System.out.println("Astroid Removed");
+                        if(!penshot) {
+                            shots.get(idx).dispose();
+                            shots.removeIndex(idx);
+                        }
 
-                        shots.get(idx).dispose();
-                        shots.removeIndex(idx);
-                        System.out.println("Shot Removed");
-
-
-                        score += 500;
+                        if(pointmulti)
+                            score += 500;
+                        else
+                            score += 250;
                         break;
                     }
                 }
@@ -271,20 +387,21 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         {
             sb.setProjectionMatrix(cam.combined);
             sb.begin();
-            sb.draw(bg, 0,0 , MVA.WIDTH, MVA.HEIGHT);
-            sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, setting.getWidth(), setting.getHeight());
+            sb.draw(bg, 0,0 , MVA.WIDTH + 300, MVA.HEIGHT+300);
+            sb.draw(setting ,MVA.WIDTH-50, MVA.HEIGHT-50, 50, 50);
             sb.draw(ship.getTexture(),ship.getPosition().x,ship.getPosition().y);
+            for(powerup pu : powerups)
+                sb.draw(pu.getTexture(),pu.getPosition().x,pu.getPosition().y);
 
             for(Astroid astroid : astroids)
                 sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
-
 
             for(smallAstroid astroid : smallastroids)
                 sb.draw(astroid.getTexture(),astroid.getPosition().x,astroid.getPosition().y);
 
             for(Shot shot: shots)
                 sb.draw(shot.getTexture(),shot.getPosition().x,shot.getPosition().y);
-
+            scoreFont.getData().setScale(1.5f);
             scoreFont.draw(sb,String.valueOf(score), 10 , MVA.HEIGHT - 25 );
             sb.end();
         }
@@ -293,7 +410,15 @@ public class PlayState extends State implements  ApplicationListener, InputProce
     @Override
     public void dispose() {
         bg.dispose();
+        setting.dispose();
         ship.dispose();
+        scoreFont.dispose();
+        ClickButton.dispose();
+        Afterdeath.dispose();
+        NukeSound.dispose();
+        PowerupSound.dispose();
+        ShipExplosion.dispose();
+
         System.out.println("Play State Disposed");
     }
 

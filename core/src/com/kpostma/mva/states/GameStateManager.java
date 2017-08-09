@@ -13,12 +13,19 @@ public class GameStateManager {
     private boolean PriorityState;
     private int HighScore;
 
+    private float mainValue;
+    private float EffectVolume;
+    private float MusicVolume;
+
+
     public GameStateManager(){
         states = new Stack<State>();
     }
+
     public void push(State state){
         states.push(state);
     }
+
     public void push(State state, boolean pstate){
         states.push(state); PriorityState = pstate;
     }
@@ -44,6 +51,49 @@ public class GameStateManager {
     }
     public boolean getPstate(){return PriorityState;}
     public void setPState(boolean pState){ PriorityState = pState;}
-    public int getHighScore(){return HighScore;}
-    public void setHighScore(int hs){HighScore = hs;}
+    public String getHighScoreString(){
+        String hs = "High Score: " + String.valueOf(HighScore);
+        return hs;
+    }
+    public void setHighScore(int hs){
+        HighScore = hs;
+        long hslong = (long)HighScore;
+        //Save.gd.addHighScore(hslong , "YOU");
+    }
+
+    public int getHighScore(){ return HighScore;}
+
+    public float getMusicVol(){
+        if(MusicVolume < 1.0f && MusicVolume >0.0f) {
+           return MusicVolume;
+        }
+        else {
+            MusicVolume = 0.5f;
+            return MusicVolume;
+        }
+    }
+
+    public void setMusicVolume(float vol){MusicVolume = vol;}
+
+    public void MusicVolumeUp(){if(MusicVolume < 1.0f) MusicVolume += 0.1f;}
+    public void MusicVolumeDown(){if(MusicVolume >= 0.1f) MusicVolume -= 0.1f;}
+
+    public float getEffectVolume(){
+        if(EffectVolume < 1.0f && EffectVolume >0.0f) {
+            return EffectVolume;
+        }
+        else {
+            EffectVolume = 0.5f;
+            return EffectVolume;
+        }
+    }
+
+
+
+
+    public void setEffectVolume(float vol){EffectVolume = vol;}
+    public void EffectVolumeUp(){if(EffectVolume < 1.0f) EffectVolume += 0.1f;}
+    public void EffectVolumeDown(){if(EffectVolume >= 0.1f) EffectVolume -= 0.1f;}
+
+
 }

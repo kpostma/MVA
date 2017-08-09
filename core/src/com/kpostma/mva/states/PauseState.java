@@ -3,6 +3,7 @@ package com.kpostma.mva.states;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,11 +16,6 @@ public class PauseState extends State  implements  InputProcessor
 {
 
 
-    class TouchInfo {
-        public float touchX = 0;
-        public float touchY = 0;
-        public boolean touched = false;
-    }
 
     private Texture bg;
     private Texture resumebtn;
@@ -27,15 +23,26 @@ public class PauseState extends State  implements  InputProcessor
     private TouchInfo Tinfo;
     BitmapFont scoreFont;
 
+    private Sound ButtonClick;
+
+
+
+    private class TouchInfo {
+        public float touchX = 0;
+        public float touchY = 0;
+        public boolean touched = false;
+    }
+
     protected PauseState(GameStateManager gsm)
     {
         super(gsm);
-        bg = new Texture("pausebg.jpg");
-        resumebtn = new Texture("pausebtn.png");
-        quitbtn = new Texture("pausebtn.png");
+        bg = new Texture("spacebg.jpg");
+        resumebtn = new Texture("resumebtn.png");
+        quitbtn = new Texture("quitbtn.png");
 
         scoreFont = new BitmapFont();
 
+        ButtonClick = Gdx.audio.newSound(Gdx.files.internal("Menu Click.mp3"));
 
         cam.setToOrtho(false, MVA.WIDTH, MVA.HEIGHT);
         Tinfo = new TouchInfo();
@@ -51,14 +58,17 @@ public class PauseState extends State  implements  InputProcessor
     protected void handleInput( ) {
         if(Tinfo.touched){
             System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
-            if(Tinfo.touchY < 200 && Tinfo.touchY > 100)
+            if(Tinfo.touchY < 500 && Tinfo.touchY > 200)
             {
                 //touched first button
                 gsm.pop(false);
+                ButtonClick.play(gsm.getEffectVolume());
                 System.out.println("popped and sent false");
             }
-            if(Tinfo.touchY > 250 && Tinfo.touchY < 350)
+            if(Tinfo.touchY > 600 && Tinfo.touchY < 800)
             {
+                //quit
+                ButtonClick.play(gsm.getEffectVolume());
                 gsm.setPState(false);
                 gsm.set(new MenuState(gsm));
             }
@@ -74,11 +84,11 @@ public class PauseState extends State  implements  InputProcessor
     public void render(SpriteBatch sb) {
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
-        sb.draw(bg, 0, 0, MVA.WIDTH, MVA.HEIGHT);
+        sb.draw(bg, 0, 0);
         sb.draw(resumebtn,50, MVA.HEIGHT - 200 , MVA.WIDTH-100, 100);
         sb.draw(quitbtn,50, MVA.HEIGHT - 350 , MVA.WIDTH - 100, 100);
         scoreFont.getData().setScale(2);
-        scoreFont.draw(sb,String.valueOf(gsm.getHighScore()), MVA.WIDTH/2 - 50 , MVA.HEIGHT - 50 );
+        scoreFont.draw(sb,gsm.getHighScoreString(),MVA.WIDTH/8 , MVA.HEIGHT - 50 );
 
         sb.end();
 
@@ -87,6 +97,10 @@ public class PauseState extends State  implements  InputProcessor
     @Override
     public void dispose() {
         bg.dispose();
+        resumebtn.dispose();
+        quitbtn.dispose();
+        scoreFont.dispose();
+        ButtonClick.dispose();
         System.out.println("Pause State Disposed");
     }
     @Override

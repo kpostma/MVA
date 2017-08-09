@@ -3,6 +3,8 @@ package com.kpostma.mva.states;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
  * Created by Postma on 8/12/2016.
@@ -18,8 +20,9 @@ public abstract class State {
         cam = new OrthographicCamera();
         mouse = new Vector3();
 
-
     }
+
+
 
     protected abstract void handleInput();
     public abstract  void update(float dt);
