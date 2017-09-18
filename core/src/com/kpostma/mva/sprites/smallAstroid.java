@@ -101,7 +101,7 @@ public class smallAstroid {
     //determins if it spawns or a powerup spawns
     public boolean astroidRespawn()
     {
-        if(rand.nextInt(100) < 95 )
+        if(rand.nextInt(100) < 85 )
         {
             return true;
         }

@@ -1,0 +1,143 @@
+
+Button.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+helpbtn
+  rotate: false
+  xy: 1, 809
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1
+highscorebtn
+  rotate: false
+  xy: 1, 607
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1
+playbtn
+  rotate: false
+  xy: 1, 405
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1
+quitbtn
+  rotate: false
+  xy: 1, 203
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1
+resumebtn
+  rotate: false
+  xy: 1, 1
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1
+arrowBtn
+  rotate: false
+  xy: 803, 809
+  size: 200, 200
+  orig: 200, 200
+  offset: 0, 0
+  index: -1
+backArrow
+  rotate: false
+  xy: 803, 607
+  size: 200, 200
+  orig: 200, 200
+  offset: 0, 0
+  index: -1
+downArrow
+  rotate: false
+  xy: 803, 405
+  size: 200, 200
+  orig: 200, 200
+  offset: 0, 0
+  index: -1
+upArrow
+  rotate: false
+  xy: 803, 203
+  size: 200, 200
+  orig: 200, 200
+  offset: 0, 0
+  index: -1
+astroidReal
+  rotate: false
+  xy: 803, 129
+  size: 72, 72
+  orig: 72, 72
+  offset: 0, 0
+  index: -1
+settingicon
+  rotate: false
+  xy: 803, 82
+  size: 45, 45
+  orig: 45, 45
+  offset: 0, 0
+  index: -1
+pu1
+  rotate: false
+  xy: 877, 165
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+pu2
+  rotate: false
+  xy: 803, 44
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+pu3
+  rotate: false
+  xy: 915, 165
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+pu4
+  rotate: false
+  xy: 803, 6
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+pu5
+  rotate: false
+  xy: 953, 165
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+ship1
+  rotate: false
+  xy: 877, 127
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+smallAstroid
+  rotate: false
+  xy: 915, 127
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+
+Button2.png
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+settingbtn
+  rotate: false
+  xy: 1, 1
+  size: 800, 200
+  orig: 800, 200
+  offset: 0, 0
+  index: -1

@@ -4,9 +4,17 @@ import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kpostma.mva.MVA;
 
 /**
@@ -18,15 +26,20 @@ public class PauseState extends State  implements  InputProcessor
 
 
     private Texture bg;
-    private Texture resumebtn;
-    private Texture quitbtn;
+    
     private TouchInfo Tinfo;
-    BitmapFont scoreFont;
 
+    private Stage stage;
+    private TextureAtlas atlas;
+    private Skin skin;
+    private Table table;
+    private TextButton resumeButton , quitButton , helpButton;
+    private Label scoreLabel;
+    private BitmapFont white, black;
+    
     private Sound ButtonClick;
-
-
-
+    
+    
     private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
@@ -36,11 +49,8 @@ public class PauseState extends State  implements  InputProcessor
     protected PauseState(GameStateManager gsm)
     {
         super(gsm);
+        System.out.println("pause state created");
         bg = new Texture("spacebg.jpg");
-        resumebtn = new Texture("resumebtn.png");
-        quitbtn = new Texture("quitbtn.png");
-
-        scoreFont = new BitmapFont();
 
         ButtonClick = Gdx.audio.newSound(Gdx.files.internal("Menu Click.mp3"));
 
@@ -51,28 +61,109 @@ public class PauseState extends State  implements  InputProcessor
         Tinfo.touchY = -1;
 
 
-        Gdx.input.setInputProcessor(this);
+
+        white = new BitmapFont(Gdx.files.internal("fonts/white.fnt"),false);
+        black = new BitmapFont(Gdx.files.internal("fonts/black.fnt"),false);
+
+
+        stage = new Stage();
+
+        Gdx.input.setInputProcessor(stage);
+
+        atlas = new TextureAtlas("ui/Button.pack");
+        skin = new Skin(atlas);
+
+        table = new Table(skin);
+        table.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        table.center().center();
+
+        TextButton.TextButtonStyle textButtonResume = new TextButton.TextButtonStyle();
+        textButtonResume.up = skin.getDrawable("resumebtn");
+        textButtonResume.down = skin.getDrawable("resumebtn");
+        textButtonResume.pressedOffsetX = 1;
+        textButtonResume.pressedOffsetY = 1;
+        textButtonResume.font = black;
+
+        TextButton.TextButtonStyle textButtonQuit = new TextButton.TextButtonStyle();
+        textButtonQuit.up = skin.getDrawable("quitbtn");
+        textButtonQuit.down = skin.getDrawable("quitbtn");
+        textButtonQuit.pressedOffsetX = 1;
+        textButtonQuit.pressedOffsetY = 1;
+        textButtonQuit.font = black;
+
+        TextButton.TextButtonStyle textButtonControls = new TextButton.TextButtonStyle();
+        textButtonControls.up = skin.getDrawable("helpbtn");
+        textButtonControls.down = skin.getDrawable("helpbtn");
+        textButtonControls.pressedOffsetX = 1;
+        textButtonControls.pressedOffsetY = 1;
+        textButtonControls.font = black;
+
+        helpButton = new TextButton("", textButtonControls);
+        helpButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                HelpStateCall();
+            }
+        });
+
+        resumeButton = new TextButton("", textButtonResume);
+        resumeButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                ResumeGame();
+            }
+        });
+
+        quitButton = new TextButton("", textButtonQuit);
+        quitButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                QuitGame();
+            }
+        });
+
+        Label.LabelStyle headingStyle = new Label.LabelStyle(white, Color.WHITE);
+        scoreLabel = new Label("Score : " + String.valueOf(gsm.getCurrentScore()) , headingStyle);
+        scoreLabel.setFontScale(3);
+
+        table.add(scoreLabel).uniform();
+        table.row();
+        table.add(resumeButton).uniform().padTop(100).padBottom(100);
+        table.row();
+        table.add(helpButton).uniform().padBottom(100);
+        table.row();
+        table.add(quitButton).uniform().padBottom(100);
+        //table.debug();
+        stage.addActor(table);
+
+        
     }
 
     @Override
     protected void handleInput( ) {
-        if(Tinfo.touched){
-            System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
-            if(Tinfo.touchY < 500 && Tinfo.touchY > 200)
-            {
-                //touched first button
-                gsm.pop(false);
-                ButtonClick.play(gsm.getEffectVolume());
-                System.out.println("popped and sent false");
-            }
-            if(Tinfo.touchY > 600 && Tinfo.touchY < 800)
-            {
-                //quit
-                ButtonClick.play(gsm.getEffectVolume());
-                gsm.setPState(false);
-                gsm.set(new MenuState(gsm));
-            }
-        }
+
+        Gdx.input.setInputProcessor(stage);
+    }
+
+    public void HelpStateCall(){
+        System.out.println("controls button");
+        ButtonClick.play(gsm.getEffectVolume());
+        gsm.push(new HelpState(gsm),true);
+        gsm.setPState(true);
+    }
+
+    public void QuitGame(){
+        //quit
+        ButtonClick.play(gsm.getEffectVolume());
+        gsm.setPState(false);
+        gsm.set(new MenuState(gsm));
+    }
+
+    public void ResumeGame(){
+        //touched first button
+        gsm.pop(false);
+        ButtonClick.play(gsm.getEffectVolume());
+        System.out.println("popped and sent false");
     }
 
     @Override
@@ -85,21 +176,19 @@ public class PauseState extends State  implements  InputProcessor
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
         sb.draw(bg, 0, 0);
-        sb.draw(resumebtn,50, MVA.HEIGHT - 200 , MVA.WIDTH-100, 100);
-        sb.draw(quitbtn,50, MVA.HEIGHT - 350 , MVA.WIDTH - 100, 100);
-        scoreFont.getData().setScale(2);
-        scoreFont.draw(sb,gsm.getHighScoreString(),MVA.WIDTH/8 , MVA.HEIGHT - 50 );
-
         sb.end();
+
+        stage.act();
+        stage.draw();
 
     }
 
     @Override
     public void dispose() {
         bg.dispose();
-        resumebtn.dispose();
-        quitbtn.dispose();
-        scoreFont.dispose();
+        stage.dispose();
+        skin.dispose();
+        atlas.dispose();
         ButtonClick.dispose();
         System.out.println("Pause State Disposed");
     }

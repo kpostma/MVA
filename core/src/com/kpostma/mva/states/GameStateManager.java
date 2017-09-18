@@ -1,5 +1,7 @@
 package com.kpostma.mva.states;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.util.Stack;
@@ -11,16 +13,21 @@ public class GameStateManager {
 
     private  Stack<State> states;
     private boolean PriorityState;
-    private int HighScore;
+    private int CurrentScore;
 
-    private float mainValue;
+    public Save mySave;
+
+
     private float EffectVolume;
     private float MusicVolume;
+    private Music music;
 
 
     public GameStateManager(){
+        mySave = new Save();
         states = new Stack<State>();
     }
+
 
     public void push(State state){
         states.push(state);
@@ -30,7 +37,6 @@ public class GameStateManager {
         states.push(state); PriorityState = pstate;
     }
     public  void pop(){
-
         states.pop().dispose();
     }
     public  void pop(boolean pstate){
@@ -51,20 +57,30 @@ public class GameStateManager {
     }
     public boolean getPstate(){return PriorityState;}
     public void setPState(boolean pState){ PriorityState = pState;}
-    public String getHighScoreString(){
-        String hs = "High Score: " + String.valueOf(HighScore);
-        return hs;
-    }
-    public void setHighScore(int hs){
-        HighScore = hs;
-        long hslong = (long)HighScore;
-        //Save.gd.addHighScore(hslong , "YOU");
+
+
+    public void StartMusic(){
+        music = Gdx.audio.newMusic(Gdx.files.internal("App Score.mp3"));
+        music.setLooping(true);
+        music.setVolume(getMusicVol());
+        music.play();
     }
 
-    public int getHighScore(){ return HighScore;}
+    public void MusicVolumeChange(){
+        music.setVolume(getMusicVol());
+    }
+
+    public void setCurrentScore(int score)
+    {
+        CurrentScore = score;
+        mySave.gd.addHighScore((long)CurrentScore , "YOU");
+    }
+    public int getCurrentScore(){
+        return CurrentScore;
+    }
 
     public float getMusicVol(){
-        if(MusicVolume < 1.0f && MusicVolume >0.0f) {
+        if(MusicVolume <= 1.1f && MusicVolume >= 0.0f) {
            return MusicVolume;
         }
         else {
@@ -75,11 +91,11 @@ public class GameStateManager {
 
     public void setMusicVolume(float vol){MusicVolume = vol;}
 
-    public void MusicVolumeUp(){if(MusicVolume < 1.0f) MusicVolume += 0.1f;}
+    public void MusicVolumeUp(){if(MusicVolume <= 1.1f) MusicVolume += 0.1f;}
     public void MusicVolumeDown(){if(MusicVolume >= 0.1f) MusicVolume -= 0.1f;}
 
     public float getEffectVolume(){
-        if(EffectVolume < 1.0f && EffectVolume >0.0f) {
+        if(EffectVolume <= 1.0f && EffectVolume >=0.0f) {
             return EffectVolume;
         }
         else {
@@ -88,12 +104,16 @@ public class GameStateManager {
         }
     }
 
+    public void loadmySave(){
+        mySave.gd = Save.LoadMySaveScores(mySave.gd);
+    }
 
-
+    public void SavemySave(){
+        Save.save(mySave.gd);
+    }
 
     public void setEffectVolume(float vol){EffectVolume = vol;}
-    public void EffectVolumeUp(){if(EffectVolume < 1.0f) EffectVolume += 0.1f;}
+    public void EffectVolumeUp(){if(EffectVolume <= 1.0f) EffectVolume += 0.1f;}
     public void EffectVolumeDown(){if(EffectVolume >= 0.1f) EffectVolume -= 0.1f;}
-
 
 }

@@ -35,15 +35,22 @@ public class powerup{
                 powerup = new Texture("pu2.png");
                 break;
             case 3:
-                //nuke
-                powerup = new Texture("pu3.png");
+                if(rand.nextInt((5-1)+1)+1 > 2) {
+                    //nuke
+                    powerup = new Texture("pu3.png");
+                }
+                else
+                {
+                    poweruptype = 4;
+                    powerup = new Texture("pu4.png");
+                }
                 break;
             case 4:
-                //bonus points
+                //point multiplier
                 powerup = new Texture("pu4.png");
                 break;
             case 5:
-                //point multiplier
+                //bonus points
                 powerup = new Texture("pu5.png");
                 break;
 

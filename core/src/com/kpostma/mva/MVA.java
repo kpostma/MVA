@@ -20,9 +20,7 @@ public class MVA extends ApplicationAdapter{
 
     private GameStateManager gsm;
 	private SpriteBatch batch;
-	Texture img;
 
-    private Music music;
 
 	@Override
 	public void create () {
@@ -32,10 +30,7 @@ public class MVA extends ApplicationAdapter{
         gsm.setEffectVolume(0.5f);
         gsm.setMusicVolume(0.5f);
 
-        music = Gdx.audio.newMusic(Gdx.files.internal("App Score.mp3"));
-        music.setLooping(true);
-        setMusicVol(gsm.getMusicVol());
-        music.play();
+        gsm.StartMusic();
 
         Gdx.gl.glClearColor(1, 0, 0, 1);
         gsm.push(new MenuState(gsm));
@@ -52,14 +47,9 @@ public class MVA extends ApplicationAdapter{
 
 
 
-    public void setMusicVol(float vol){
-        music.setVolume(vol);
-    }
-
 
     @Override
     public void dispose() {
         super.dispose();
-        music.dispose();
     }
 }

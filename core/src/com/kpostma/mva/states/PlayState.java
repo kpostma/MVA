@@ -83,7 +83,6 @@ public class PlayState extends State implements  ApplicationListener, InputProce
         shotswitch = true;
         scoreFont = new BitmapFont();
         score = 0;
-        hs = gsm.getHighScore();
         astroids = new Array<Astroid>();
 
         Afterdeath = Gdx.audio.newSound(Gdx.files.internal("After Death.mp3"));
@@ -125,11 +124,8 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                 System.out.println(Tinfo.touchX + " : " + Tinfo.touchY);
                 if(Tinfo.touchX > MVA.WIDTH - 200 && Tinfo.touchY < 200)
                 {
-                    if(score > hs)
-                    {
-                        hs = score;
-                        gsm.setHighScore(hs);
-                    }
+                    gsm.setCurrentScore(score);
+                    gsm.setCurrentScore(score);
                     ClickButton.play(gsm.getEffectVolume());
                     gsm.push(new PauseState(gsm),true);
                     state = GAME_PAUSED;
@@ -148,7 +144,15 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                     movementSwitch = true;
                 }
 
-                shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                if(rapidfire)
+                {
+                    shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) -5 , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                    shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) +5 , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                }
+                else{
+                    shots.add(new Shot((int)ship.getPosition().x + (ship.getTexture().getWidth()/2) , (int)ship.getPosition().y + (ship.getTexture().getHeight())) );
+                }
+
                 shotswitch = true;
 
                 }
@@ -234,16 +238,17 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                             }
                             break;
                         case 4:
-                            //point bonus
-                            System.out.println("+1500 points");
-                            score += 1500;
-                            break;
-                        case 5:
                             //point multiplier
                             System.out.println("point multiplier");
                             rapidfire = false;
                             penshot = false;
                             pointmulti = true;
+                            break;
+
+                        case 5:
+                            //point bonus
+                            System.out.println("+1500 points");
+                            score += 1500;
                             break;
 
                     }
@@ -280,10 +285,11 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                 astroid.bounce();
             //ship hit end game
             if(astroid.collides(ship.getBounds())) {
-                gsm.setHighScore(hs);
+                gsm.setCurrentScore(score);
+                gsm.SavemySave();
                 ShipExplosion.play(gsm.getEffectVolume());
                 Afterdeath.play(gsm.getEffectVolume());
-                gsm.set(new MenuState(gsm));
+                gsm.set(new LoseState(gsm,score));
             }
         }
 
@@ -299,10 +305,10 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                 smallastroid.bounce();
             //if hits ship end game
             if(smallastroid.collides(ship.getBounds())){
-                gsm.setHighScore(hs);
+                gsm.setCurrentScore(score);
                 ShipExplosion.play(gsm.getEffectVolume());
                 Afterdeath.play(gsm.getEffectVolume());
-                gsm.set(new MenuState(gsm));
+                gsm.set(new LoseState(gsm,score));
             }
         }
 
@@ -345,9 +351,9 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                     }
 
                     if(pointmulti)
-                    score += 500;
+                    score += 600;
                     else
-                    score += 250;
+                    score += 300;
 
                     break;
                 }
@@ -368,9 +374,9 @@ public class PlayState extends State implements  ApplicationListener, InputProce
                         }
 
                         if(pointmulti)
-                            score += 500;
+                            score += 400;
                         else
-                            score += 250;
+                            score += 200;
                         break;
                     }
                 }

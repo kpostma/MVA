@@ -1,13 +1,12 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.kpostma.mva.states.GameData;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 
 /**
  * Created by Postma on 8/3/2017.
@@ -15,50 +14,86 @@ import java.io.ObjectOutputStream;
 public class Save {
     public static GameData gd;
 
-    public static void save(){
-        /*
-        try{
-
-            ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("highscores.sav"));
-            out.writeObject(gd);
-            out.close();
-        }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-            Gdx.app.exit();
-        }
-        */
+    //if there is no save
+    public Save() {
     }
 
-    public static void load() {
-        init();
-/*
+    public static void save(GameData mygd){
         try{
-            if(!saveFileExists()){
-                init();
-                return;
+            String[] names;
+            String str = "";
+            long[] highscores;
+            long yourHighscore;
+
+            highscores = mygd.getHighscores();
+            names = mygd.getNames();
+
+            for(int i = 0; i< highscores.length; i++)
+            {
+                if(names[i] == "YOU")
+                {
+                    yourHighscore = highscores[i];
+
+                    FileHandle file = Gdx.files.local("hs.txt");
+                    file.writeString( str.valueOf(yourHighscore), false);
+                    System.out.print("File saved!!!");
+                }
             }
-            ObjectInputStream in = new ObjectInputStream(new FileInputStream("highscores.sav"));
-            gd = (GameData) in.readObject();
-            in.close();
+
         }
         catch (Exception e)
         {
             e.printStackTrace();
             Gdx.app.exit();
         }
-        */
     }
 
-    public static boolean saveFileExists(){
-        File f = new File("highscores.sav");
-        return f.exists();
+    public static GameData LoadMySaveScores(GameData mygd){
+        try{
+            Long temp = null;
+
+            if(mygd == null)
+            {
+                mygd = new GameData();
+                mygd.init();
+            }
+            if(Gdx.files.local("hs.txt").exists())
+            {
+                System.out.print("File FOUND!!!");
+                FileHandle file = Gdx.files.local("hs.txt");
+                String text = file.readString();
+                temp = temp.valueOf(text);
+
+                String[] names;
+                long[] highscores;
+                highscores = mygd.getHighscores();
+                names = mygd.getNames();
+                for(int i = 0; i< highscores.length; i++)
+                {
+                    if(names[i] == "YOU")
+                    {
+                        if(temp > highscores[i])
+                        {
+                            highscores[i] = temp;
+                        }
+                    }
+                }
+
+            }
+            else
+            {
+                gd = new GameData();
+                gd.init();
+            }
+
+        }
+            catch (Exception e)
+        {
+            e.printStackTrace();
+            Gdx.app.exit();
+        }
+        return mygd;
     }
 
-    public static void init(){
-        gd = new GameData();
-        gd.init();
-        //save();
-    }
+
 }

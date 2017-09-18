@@ -4,96 +4,190 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.kpostma.mva.MVA;
 
 /**
  * Created by Postma on 8/12/2016.
  */
 public class MenuState extends State  implements  InputProcessor {
+    
     private Texture bg;
-    private Texture playBtn;
-    private Texture hsBtn;
-    private Texture settingsBtn;
-
-    private GameData gd;
-
-    private int test;
-    private int hs;
 
     private Sound ButtonClick;
-
     private TouchInfo Tinfo;
+
+    private Stage stage;
+    private TextureAtlas atlas;
+    private Skin skin;
+    private Table table;
+    private TextButton PlayBtn , HighscoreBtn , SettingsBtn, controls;
+    private BitmapFont white, black;
 
     private class TouchInfo {
         public float touchX = 0;
         public float touchY = 0;
         public boolean touched = false;
     }
-
     public MenuState(GameStateManager gsm) {
         super(gsm);
+        System.out.println("Menu State Created.");
         bg = new Texture("spacebg.jpg");
-        playBtn = new Texture("playbtn.png");
-        hsBtn = new Texture("highscorebtn.png");
-        settingsBtn = new Texture("settingbtn.png");
-        test = 5;
+
+        Gdx.files.local("hs.bin").delete();
+
+        gsm.loadmySave();
+
+        gsm.SavemySave();
+
+
         cam.setToOrtho(false,MVA.WIDTH, MVA.HEIGHT);
 
         ButtonClick = Gdx.audio.newSound(Gdx.files.internal("Menu Click.mp3"));
-
-        hs=gsm.getHighScore();
-
+        
         Tinfo = new TouchInfo();
         Tinfo.touched = false;
         Tinfo.touchX = -1;
         Tinfo.touchY = -1;
 
-        Gdx.input.setInputProcessor(this);
 
+        white = new BitmapFont(Gdx.files.internal("fonts/white.fnt"),false);
+        black = new BitmapFont(Gdx.files.internal("fonts/black.fnt"),false);
+
+
+        stage = new Stage();
+
+        Gdx.input.setInputProcessor(stage);
+
+        atlas = new TextureAtlas("ui/Button.pack");
+        skin = new Skin(atlas);
+
+        table = new Table(skin);
+        table.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
+        table.center().top();
+
+        TextButton.TextButtonStyle textButtonPlay = new TextButton.TextButtonStyle();
+        textButtonPlay.up = skin.getDrawable("playbtn");
+        textButtonPlay.down = skin.getDrawable("playbtn");
+        textButtonPlay.pressedOffsetX = 1;
+        textButtonPlay.pressedOffsetY = 1;
+        textButtonPlay.font = black;
+
+        TextButton.TextButtonStyle textButtonSettings = new TextButton.TextButtonStyle();
+        textButtonSettings.up = skin.getDrawable("settingbtn");
+        textButtonSettings.down = skin.getDrawable("settingbtn");
+        textButtonSettings.pressedOffsetX = 1;
+        textButtonSettings.pressedOffsetY = 1;
+        textButtonSettings.font = black;
+
+        TextButton.TextButtonStyle textButtonHighscore = new TextButton.TextButtonStyle();
+        textButtonHighscore.up = skin.getDrawable("highscorebtn");
+        textButtonHighscore.down = skin.getDrawable("highscorebtn");
+        textButtonHighscore.pressedOffsetX = 1;
+        textButtonHighscore.pressedOffsetY = 1;
+        textButtonHighscore.font = black;
+
+        TextButton.TextButtonStyle textButtonControls = new TextButton.TextButtonStyle();
+        textButtonControls.up = skin.getDrawable("helpbtn");
+        textButtonControls.down = skin.getDrawable("helpbtn");
+        textButtonControls.pressedOffsetX = 1;
+        textButtonControls.pressedOffsetY = 1;
+        textButtonControls.font = black;
+
+
+        controls = new TextButton("", textButtonControls);
+        controls.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                HelpStateCall();
+            }
+        });
+
+
+        PlayBtn = new TextButton("",textButtonPlay);
+        PlayBtn.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                PlayStateStart();
+            }
+        });
+        SettingsBtn = new TextButton("", textButtonSettings);
+        SettingsBtn.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                SettingsStart();
+            }
+        });
+        HighscoreBtn = new TextButton("", textButtonHighscore);
+        HighscoreBtn.addListener(new ClickListener(){
+            @Override
+            public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
+                HighscoreStart();
+            }
+        });
+        table.pad(100).center().center();
+        table.add(PlayBtn);
+        table.row();
+        table.add(SettingsBtn).padTop(100);
+        table.row();
+        table.add(HighscoreBtn).padTop(100);
+        table.row();
+        table.add(controls).padTop(100);
+        //table.debug();
+        stage.addActor(table);
+        
     }
 
     @Override
     public void handleInput() {
-        if(Tinfo.touched)
-        {
-            System.out.println("touched" + Tinfo.touchY);
-            if(Tinfo.touchY < ((MVA.HEIGHT / 4) +200) && Tinfo.touchY > ((MVA.HEIGHT / 4)))
-            {
-                ButtonClick.play(gsm.getEffectVolume());
-                System.out.println("touched play");
-                gsm.set(new PlayState(gsm));
-                //gsm.setHighScore(hs);
-                gsm.setPState(false);
-            }
-            else if(Tinfo.touchY < ((MVA.HEIGHT / 4) )*4 +200 && Tinfo.touchY > ((MVA.HEIGHT / 4)*4))
-            {
-                ButtonClick.play(gsm.getEffectVolume());
-                System.out.println("Touched Settings");
-                gsm.set(new SettingsState(gsm));
-               // gsm.setHighScore(hs);
-                gsm.setPState(false);
-            }
-            else if(Tinfo.touchY < ((MVA.HEIGHT / 4) )*6 +200&& Tinfo.touchY > ((MVA.HEIGHT / 4)*6))   {
-                ButtonClick.play(gsm.getEffectVolume());
-                System.out.println("Touched HighScore");
-                gsm.set(new HighScoreState(gsm));
-                //gsm.setHighScore(hs);
-                gsm.setPState(false);
-            }
-
-        }
 
     }
+
+
+    public void HelpStateCall(){
+        System.out.println("controls button");
+        ButtonClick.play(gsm.getEffectVolume());
+        gsm.set(new HelpState(gsm));
+        gsm.setPState(false);
+    }
+
+    public void PlayStateStart(){
+        System.out.println("Play Pressed");
+        ButtonClick.play(gsm.getEffectVolume());
+        gsm.set(new PlayState(gsm));
+        gsm.setPState(false);
+    }
+    public void SettingsStart(){
+        ButtonClick.play(gsm.getEffectVolume());
+        System.out.println("settings pressed");
+        gsm.set(new SettingsState(gsm));
+        gsm.setPState(false);
+    }
+    public void HighscoreStart(){
+        ButtonClick.play(gsm.getEffectVolume());
+        System.out.println("Hishcore Pressed");
+        gsm.set(new HighScoreState(gsm));
+        gsm.setPState(false);
+    }
+
+
     @Override
     public void render(SpriteBatch sb) {
         sb.setProjectionMatrix(cam.combined);
         sb.begin();
-        sb.draw(bg, 0,0);
-        sb.draw(playBtn ,50, (MVA.HEIGHT / 4)*3 , MVA.WIDTH - 100, 100);
-        sb.draw(settingsBtn ,50, (MVA.HEIGHT / 4)*2 , MVA.WIDTH - 100, 100);
-        sb.draw(hsBtn ,50, (MVA.HEIGHT / 4) , MVA.WIDTH - 100, 100);
+        sb.draw(bg, 0, 0, MVA.WIDTH + 300 , MVA.HEIGHT + 300);
         sb.end();
+
+        stage.act();
+        stage.draw();
     }
 
     @Override
@@ -101,17 +195,17 @@ public class MenuState extends State  implements  InputProcessor {
         handleInput();
         if(gsm.getPstate() == false)
         {
-            Gdx.input.setInputProcessor(this);
+            Gdx.input.setInputProcessor(stage);
         }
     }
 
     @Override
     public void dispose() {
         bg.dispose();
-        playBtn.dispose();
-        hsBtn.dispose();
         ButtonClick.dispose();
-        settingsBtn.dispose();
+        stage.dispose();
+        skin.dispose();
+        atlas.dispose();
         System.out.println("Menu State Dispoed");
     }
 
@@ -163,4 +257,5 @@ public class MenuState extends State  implements  InputProcessor {
     public boolean scrolled(int amount) {
         return false;
     }
+
 }
