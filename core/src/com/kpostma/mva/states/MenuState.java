@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -66,6 +67,7 @@ public class MenuState extends State  implements  InputProcessor {
         stage = new Stage();
 
         Gdx.input.setInputProcessor(stage);
+        Gdx.input.setCatchBackKey(true);
 
         atlas = new TextureAtlas("ui/Button.pack");
         skin = new Skin(atlas);
@@ -148,7 +150,9 @@ public class MenuState extends State  implements  InputProcessor {
 
     @Override
     public void handleInput() {
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK)) {
+            Gdx.app.exit();
+        }
     }
 
 
@@ -224,7 +228,6 @@ public class MenuState extends State  implements  InputProcessor {
         Tinfo.touched = false;
         return true;
     }
-
 
     @Override
     public boolean keyDown(int keycode) {

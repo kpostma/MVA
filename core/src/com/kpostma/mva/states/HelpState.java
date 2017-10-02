@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
@@ -27,7 +28,7 @@ public class HelpState extends State{
     private Skin skin;
     private Table table;
     private TextButton backButton , shipPic, astroidPic , powerup1pic , powerup2pic , powerup3pic , powerup4pic , powerup5pic;
-    private Label heading,controls, powerup1 , powerup2 , powerup3 , powerup4 , powerup5, pwrups;
+    private Label heading,controls, powerup1 , powerup2 , powerup3 , powerup4 , powerup5, pwrups, powerupD;
     private BitmapFont white, black;
     private Sound ButtonClick;
 
@@ -64,6 +65,7 @@ public class HelpState extends State{
         textButtonBack.pressedOffsetY = 1;
         textButtonBack.font = black;
 
+/*
         backButton = new TextButton("", textButtonBack);
         backButton.addListener(new ClickListener(){
             @Override
@@ -71,7 +73,7 @@ public class HelpState extends State{
                 SettingsStateLaunch();
             }
         });
-
+*/
         TextButton.TextButtonStyle textButtonShip = new TextButton.TextButtonStyle();
         textButtonShip.up = skin.getDrawable("ship1");
         textButtonShip.down = skin.getDrawable("ship1");
@@ -132,10 +134,10 @@ public class HelpState extends State{
         controls = new Label ("Tap on screen will both change ship direction and shots.\n \nGet points for destroying both large and small asteroids.\n\nLarge Asteroid = 200 Points\n\nSmall Asteroid = 300 Points", headingStyle);
         controls.setFontScale(1.0f);
         
-        powerup1 = new Label("Each tap shoots 2 lasers instead of 1", headingStyle);
+        powerup1 = new Label("Shots shoots 2 lasers instead of 1", headingStyle);
         powerup1.setFontScale(1.0f);
 
-        powerup2 = new Label("Each shot penetrates through all asteroids", headingStyle);
+        powerup2 = new Label("Shot penetrates through all asteroids", headingStyle);
         powerup2.setFontScale(1.0f);
 
         powerup3 = new Label("Destroys all asteroids", headingStyle);
@@ -147,8 +149,10 @@ public class HelpState extends State{
         powerup5 = new Label("1500 Point Bonus" , headingStyle);
         powerup5.setFontScale(1.0f);
 
+        powerupD = new Label("Ship must hit power up to activate.", headingStyle);
+        powerup5.setFontScale(1.0f);
 
-        table.add(backButton).left().width(300).height(125).padLeft(100);
+        //table.add(backButton).left().width(300).height(125).padLeft(100);
         table.row();
         table.add(heading).colspan(4).uniform();
         table.row();
@@ -160,6 +164,8 @@ public class HelpState extends State{
 
         table.add(pwrups).colspan(4).uniform();
 
+        table.row();
+        table.add(powerupD).colspan(4).uniform();
         table.row();
 
         table.add(powerup1).colspan(3).left().padLeft(100).center();
@@ -185,7 +191,10 @@ public class HelpState extends State{
 
     @Override
     protected void handleInput() {
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK))
+        {
+            SettingsStateLaunch();
+        }
     }
 
     @Override

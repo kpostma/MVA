@@ -28,7 +28,7 @@ public class GameData implements Serializable{
             highscores[2] = 250000;
             names[2] = "Alex";
             highscores[3] = 150000;
-            names[3] = "Kyle";
+            names[3] = "Laura";
             highscores[4] = 100000;
             names[4] = "Kayla";
             highscores[5] = 75000;
@@ -38,7 +38,7 @@ public class GameData implements Serializable{
             highscores[7] = 25000;
             names[7] = "Dan";
             highscores[8] = 10000;
-            names[8] = "Mike";
+            names[8] = "Kyle";
             highscores[9] = 0;
             names[9] = "YOU";
         }
@@ -56,24 +56,28 @@ public class GameData implements Serializable{
                if(highscores[i] < newScore)
                {
                    highscores[i] = newScore;
-                   int t = i;
 
-                   while(highscores[t] > highscores[t-1])
-                   {
-                       long tempScore = highscores[t];
-                       highscores[t] = highscores[t-1];
-                       highscores[t-1] = tempScore;
-                       names[t] = names[t-1];
-                       names[t-1] = "YOU";
-                       if(t > 1)
-                        {t--;}
-                       else
-                        {break;}
-                   }
                }
            }
        }
     }
-
+    public void sortHighScores()
+    {
+        for(int i = 1; i< highscores.length; i++) {
+                        int t = i;
+            while (highscores[t] > highscores[t - 1]) {
+                long tempScore = highscores[t];
+                highscores[t] = highscores[t - 1];
+                highscores[t - 1] = tempScore;
+                names[t] = names[t - 1];
+                names[t - 1] = "YOU";
+                if (t > 1) {
+                    t--;
+                } else {
+                    break;
+                }
+            }
+        }
+    }
 
 }

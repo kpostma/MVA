@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -28,7 +29,7 @@ public class HighScoreState extends State implements InputProcessor {
     private TextureAtlas atlas;
     private Skin skin;
     private Table table;
-    private TextButton backButton;
+   // private TextButton backButton;
     private Label HighscoreLabel, scorelabel, ranklabel, nameslabel;
     private Label[] Scores, Ranks, Names;
     private BitmapFont white, black;
@@ -58,8 +59,10 @@ public class HighScoreState extends State implements InputProcessor {
 
         //loads the array with scores
         //Save.load();
+        gsm.mySave.gd.sortHighScores();
         highscores = gsm.mySave.gd.getHighscores();
         names = gsm.mySave.gd.getNames();
+
 
         for(int i = 0; i< highscores.length; i++)
         {
@@ -87,7 +90,7 @@ public class HighScoreState extends State implements InputProcessor {
         table = new Table(skin);
         table.setBounds(0,0,Gdx.graphics.getWidth(),Gdx.graphics.getHeight());
         table.center().top();
-
+        /*
         TextButton.TextButtonStyle textButtonBack = new TextButton.TextButtonStyle();
         textButtonBack.up = skin.getDrawable("backArrow");
         textButtonBack.down = skin.getDrawable("downArrow");
@@ -95,13 +98,15 @@ public class HighScoreState extends State implements InputProcessor {
         textButtonBack.pressedOffsetY = 1;
         textButtonBack.font = black;
 
-        backButton = new TextButton("", textButtonBack);
+       backButton = new TextButton("", textButtonBack);
         backButton.addListener(new ClickListener(){
             @Override
             public void clicked(com.badlogic.gdx.scenes.scene2d.InputEvent event, float x, float y) {
                 mainMenu();
             }
-        });
+        });*/
+
+
         Label.LabelStyle headingStyle = new Label.LabelStyle(white, Color.WHITE);
 
         HighscoreLabel = new Label("Your Highscore : " + yourHighscore , headingStyle);
@@ -122,9 +127,9 @@ public class HighScoreState extends State implements InputProcessor {
             Names[i] = new Label(String.valueOf(names[i]),headingStyle);
         }
 
-        table.add(backButton).left().width(300).height(125);
+       // table.add(backButton).left().width(300).height(125);
         table.row();
-        table.add(HighscoreLabel).colspan(3).uniform().padBottom(200).padTop(200).padLeft(50).padRight(50);
+        table.add(HighscoreLabel).colspan(3).uniform().padBottom(200).padTop(300).padLeft(50).padRight(50);
         table.row();
         table.add(ranklabel).uniform();
         table.add(nameslabel).uniform();
@@ -161,7 +166,10 @@ public class HighScoreState extends State implements InputProcessor {
 
     @Override
     protected void handleInput() {
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK))
+        {
+            mainMenu();
+        }
     }
 
     public void mainMenu(){
@@ -198,6 +206,8 @@ public class HighScoreState extends State implements InputProcessor {
         sb.end();
 
 */
+
+
         sb.begin();
         sb.draw(bg, 0, 0, MVA.WIDTH + 300 , MVA.HEIGHT + 300);
         sb.end();
@@ -212,7 +222,7 @@ public class HighScoreState extends State implements InputProcessor {
         stage.dispose();
         skin.dispose();
         atlas.dispose();
-        ButtonClick.dispose();
+        //ButtonClick.dispose();
         System.out.println("Setting State disposed.");
     }
     @Override
@@ -220,6 +230,8 @@ public class HighScoreState extends State implements InputProcessor {
         Tinfo.touchX = screenX;
         Tinfo.touchY = screenY;
         Tinfo.touched = true;
+        System.out.println("TOUCH DOWN---------------."+ button);
+
         return true;
     }
 
@@ -230,16 +242,26 @@ public class HighScoreState extends State implements InputProcessor {
         Tinfo.touchY = -1;
         Tinfo.touched = false;
         System.out.println("touched: " + Tinfo.touchX +" , " + Tinfo.touchY );
+        System.out.println("TOUCH UP--------------------."+ button);
         return true;
     }
 
+
     @Override
     public boolean keyDown(int keycode) {
+        if(keycode == Input.Keys.BACK){
+            // Respond to the back button click here
+            mainMenu();
+            return true;
+        }
         return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
+
+
+        System.out.println("KEY UP-------------------." + keycode);
         return false;
     }
 

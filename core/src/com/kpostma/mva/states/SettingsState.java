@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -95,7 +96,7 @@ public class SettingsState extends State implements InputProcessor {
         textButtonBack.pressedOffsetY = 1;
         textButtonBack.font = black;
 
-
+/*
         backButton = new TextButton("", textButtonBack);
         backButton.addListener(new ClickListener(){
             @Override
@@ -103,7 +104,7 @@ public class SettingsState extends State implements InputProcessor {
                 mainMenu();
             }
         });
-
+*/
         effectvolup = new TextButton("", textButtonUp);
         effectvolup.addListener(new ClickListener(){
             @Override
@@ -143,7 +144,7 @@ public class SettingsState extends State implements InputProcessor {
         effectLabel = new Label("Effect Volume : " + String.valueOf((int)(gsm.getEffectVolume()*10)) , headingStyle);
         effectLabel.setFontScale(1.5f);
 
-        table.add(backButton).left().width(300).height(125);
+       // table.add(backButton).left().width(300).height(125);
         table.row();
         table.add(heading).colspan(3).uniform().padBottom(200).padTop(200).padLeft(50).padRight(50);
         table.row();
@@ -162,6 +163,9 @@ public class SettingsState extends State implements InputProcessor {
 
     @Override
     protected void handleInput() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK)) {
+            mainMenu();
+        }
 
     }
 

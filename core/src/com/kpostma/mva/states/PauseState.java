@@ -2,6 +2,7 @@ package com.kpostma.mva.states;
 
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -141,7 +142,10 @@ public class PauseState extends State  implements  InputProcessor
 
     @Override
     protected void handleInput( ) {
-
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK))
+        {
+            ResumeGame();
+        }
         Gdx.input.setInputProcessor(stage);
     }
 

@@ -16,7 +16,7 @@ android {
     }
     defaultConfig {
         applicationId "com.kpostma.mva"
-        minSdkVersion 8
+        minSdkVersion 9
         targetSdkVersion 24
     }
 }

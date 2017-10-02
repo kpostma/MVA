@@ -1,6 +1,7 @@
 package com.kpostma.mva.states;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -118,6 +119,15 @@ public class PlayState extends State implements  ApplicationListener, InputProce
 
     @Override
     protected void handleInput() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.BACK))
+        {
+            gsm.setCurrentScore(score);
+            gsm.setCurrentScore(score);
+            ClickButton.play(gsm.getEffectVolume());
+            gsm.push(new PauseState(gsm),true);
+            state = GAME_PAUSED;
+            System.out.println("game paused");
+        }
         if(Gdx.input.justTouched())
         {
             if(Tinfo.touched){
@@ -446,16 +456,12 @@ public class PlayState extends State implements  ApplicationListener, InputProce
 
     @Override
     public boolean keyDown(int keycode) {
-        Kdown.touched = true;
-        Kdown.keycode = keycode;
-        return true;
+        return false;
     }
 
     @Override
     public boolean keyUp(int keycode) {
-        Kdown.touched = false;
-        Kdown.keycode = keycode;
-        return true;
+        return false;
     }
 
 
